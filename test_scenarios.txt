@@ -1,0 +1,23 @@
+1. lock endpoint
+- User tries to send an ESDT payments vector
+    -> if vector is empty, it fails at require with "no payment provided" message
+    -> if any token is invalid (nonce == 0 or amount == 0 or not whitelisted) -> fail
+    -> if successful -> tokens are present in locked_token_amounts storage
+
+
+2. unlock endpoint
+suggest require(!tokens.is_empty())
+- User tries to unlock his locked ESDTs (1 or many)
+    -> if a token from the the list wasn't locked before -> fail
+    -> if any token is invalid (ammount == 0 or token_amount > locked_amount) -> fail
+    -> if successful -> tokens are present in unlocked_token_amounts storage
+    -> if successful -> tokens are present in unlocked_token_epochs storage 
+    -> if successful -> if locked_amount remains 0, then it must be removed from locked_tokens storage
+    -> if successful -> tokens are present in unlocked_tokens storage
+
+
+3. unbond endpoint
+- User tries to claim his unlocked tokens if unbond_period has past
+    -> if no token is supplied -> fail
+    -> if the claim is asked for valid tokens(unbond_period has past), available token entries are removed from 
+        the unlocked_tokens storage and provided to the caller
